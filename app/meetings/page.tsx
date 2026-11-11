@@ -1,41 +1,10 @@
-import { headers } from "next/headers";
+
 import MeetingCard from "../../components/MeetingCards";
+import { getMeetings } from "@/lib/meetings-db";
 import type { SacramentMeeting } from "@/lib/types";
 
-async function getMeetings(): Promise<SacramentMeeting[]> {
-  const headersList = await headers();
-
-  const host =
-    headersList.get("x-forwarded-host") ??
-    headersList.get("host");
-
-  const protocol =
-    headersList.get("x-forwarded-proto") ?? "http";
-
-  if (!host) {
-    throw new Error("Unable to determine the application address.");
-  }
-
-  const response = await fetch(
-    `${protocol}://${host}/api/meetings`,
-    { cache: "no-store" }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch sacrament meetings.");
-  }
-
-  return response.json();
-}
-
-export default async function MeetingsPage() {
-  let meetings: SacramentMeeting[] = [];
-
-  try {
-    meetings = await getMeetings();
-  } catch (error) {
-    console.error("Error loading meetings:", error);
-  }
+export default function MeetingsPage() {
+  const meetings: SacramentMeeting[] = getMeetings();
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-10">
